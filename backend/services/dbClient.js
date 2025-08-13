@@ -1,4 +1,5 @@
 // dbClient.js
+import 'dotenv/config';
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -15,10 +16,8 @@ const config = {
     idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000,
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 10000,
 
-    // SSL configuration for production
-    ssl: process.env.NODE_ENV === 'production' ? {
-        rejectUnauthorized: false
-    } : false,
+    // Only use SSL if explicitly enabled
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 
     // Additional options
     application_name: process.env.APP_NAME || 'MyApp',
@@ -27,6 +26,18 @@ const config = {
 
 // Create a new connection pool
 const pool = new Pool(config);
+
+// Function to test DB connection
+export const connectDB = async () => {
+  try {
+    const client = await pool.connect();
+    console.log('✅ Database connected successfully');
+    client.release();
+  } catch (err) {
+    console.error('❌ Database connection failed:', err.message);
+    process.exit(1); // Exit process if DB connection fails
+  }
+};
 
 // Optional: helper function for querying
 export const query = async (text, params) => {

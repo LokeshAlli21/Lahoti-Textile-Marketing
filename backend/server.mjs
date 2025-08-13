@@ -4,11 +4,13 @@ import cors from 'cors';
 import { loggerMiddleware } from './middlewares/loggerMiddleware.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
-import hotelRoutes from './routes/hotelRoutes.js'
+import hotelRoutes from './routes/hotelRoutes.js';
+import {connectDB} from './services/dbClient.js'
 
 dotenv.config();
 
 const app = express();
+await connectDB();
 
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN_URL, credentials: true }));
