@@ -21,6 +21,8 @@ export const addHotel = async (req, res) => {
             contact_person_alt_phone
         } = req.body;
 
+        console.log(req.body)
+
         // Validate required fields
         if (!name || !latitude || !longitude) {
             return res.status(400).json({ 
@@ -335,6 +337,43 @@ export const softDeleteHotel = async (req, res) => {
     } catch (error) {
         console.error("Error deleting hotel:", error);
         res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getDashboardView = async (req, res) => {
+
+    try {
+        // Query for dashboard summary
+        const dashboardSummaryQuery = `
+            SELECT * FROM dashboard_summary
+        `;
+        
+        // Query for recent activities  
+        const recentActivitiesQuery = `
+            SELECT * FROM recent_activities
+            LIMIT 10
+        `;
+
+        // Execute both queries concurrently
+        const [summaryResult, activitiesResult] = await Promise.all([
+            query(dashboardSummaryQuery),
+            query(recentActivitiesQuery)
+        ]);
+
+        // Structure the response data
+        const dashboardData = {
+            summary: summaryResult.rows[0] || null,
+            recentActivities: activitiesResult.rows || []
+        };
+
+        res.json({
+            success: true,
+            dashboard: dashboardData
+        });
+
+    } catch (error) {
+        console.error('Get Dashboard View Error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
