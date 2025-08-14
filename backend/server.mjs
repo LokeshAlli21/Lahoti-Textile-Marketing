@@ -6,6 +6,7 @@ import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import hotelRoutes from './routes/hotelRoutes.js';
 import {connectDB} from './services/dbClient.js'
+import {createUserManually} from './controllers/authController.js'
 
 dotenv.config();
 
@@ -17,6 +18,9 @@ app.use(cors({ origin: process.env.FRONTEND_ORIGIN_URL, credentials: true }));
 app.use(express.json());
 app.use(loggerMiddleware);
 app.use(express.urlencoded({ extended: true }));
+
+// only once to execute
+// createUserManually({ full_name: 'sample', email: 'one@one.com', password: "12345678", phone: "1234567899" })
 
 // Routes
 app.get('/api/test', (req, res) => {

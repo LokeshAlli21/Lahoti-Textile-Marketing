@@ -9,19 +9,7 @@ import { generateToken } from '../utils/generateToken.js';
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        // Input validation
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
-        }
-
-        // Email format validation (basic)
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ message: 'Please provide a valid email address' });
-        }
-
-        console.log(`Attempting login for: ${email}`);
+        console.log('Login attempt:', { email, password: '***' });
 
         // Get user from database
         const sql = `
@@ -31,28 +19,32 @@ export const login = async (req, res) => {
             LIMIT 1
         `;
         const result = await query(sql, [email.toLowerCase().trim()]);
+        // console.log('Query result:', { 
+        //     rowCount: result.rows.length, 
+        //     userFound: result.rows.length > 0 
+        // });
 
         if (result.rows.length === 0) {
+            // console.log('No user found with email:', email);
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
         const user = result.rows[0];
+        // console.log('User found:', { id: user.id, email: user.email });
         
         // Verify password
+        // console.log('Comparing passwords...');
         const isValid = await bcrypt.compare(password, user.password_hash);
+        // console.log('Password valid:', isValid);
 
         if (!isValid) {
+            console.log('Password comparison failed');
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        // Update last login timestamp (optional)
-        await query(
-            `UPDATE users SET updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata' WHERE id = $1`,
-            [user.id]
-        );
-
         // Generate JWT token
         const token = generateToken(user.id);
+        // console.log(token)
 
         return res.json({
             success: true,
@@ -83,7 +75,7 @@ export const getUser = async (req, res) => {
         }
 
         const sql = `
-            SELECT id, full_name, email, phone, created_at, updated_at
+            SELECT id, full_name, email, phone, created_at
             FROM users
             WHERE id = $1
             LIMIT 1
@@ -129,7 +121,7 @@ export const updateProfile = async (req, res) => {
             UPDATE users 
             SET full_name = $1, phone = $2
             WHERE id = $3
-            RETURNING id, full_name, email, phone, created_at, updated_at
+            RETURNING id, full_name, email, phone, created_at
         `;
 
         const result = await query(sql, [
@@ -254,14 +246,14 @@ export const getAllUsers = async (req, res) => {
 
         const sql = `
             SELECT 
-                u.id, u.full_name, u.email, u.phone, u.created_at, u.updated_at,
+                u.id, u.full_name, u.email, u.phone, u.created_at
                 COUNT(h.id) as hotels_created,
                 COUNT(v.id) as total_visits
             FROM users u
             LEFT JOIN hotels h ON u.id = h.created_by AND h.is_deleted = false
             LEFT JOIN visits v ON u.id = v.visited_by
             ${whereClause}
-            GROUP BY u.id, u.full_name, u.email, u.phone, u.created_at, u.updated_at
+            GROUP BY u.id, u.full_name, u.email, u.phone, u.created_at
             ORDER BY u.created_at DESC
             LIMIT $${params.length - 1} OFFSET $${params.length}
         `;
