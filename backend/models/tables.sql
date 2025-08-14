@@ -61,7 +61,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_hotel_insert_visit
 AFTER INSERT ON hotels
 FOR EACH ROW
-EXECUTE FUNCTION handle_hotel_insert_visit();
+EXECUTE FUNCTION handle_hotel_insert_visit();3
 
 -- Also create a standard updated_at trigger for visits table itself
 CREATE OR REPLACE FUNCTION update_visits_updated_at()

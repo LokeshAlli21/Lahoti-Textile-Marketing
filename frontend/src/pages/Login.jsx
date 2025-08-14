@@ -5,107 +5,79 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import authService from '../backend-services/auth/auth';
 import { toast } from 'react-toastify';
-import {login} from '../store/authSlice'
-
+import { login } from '../store/authSlice';
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  
+
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
-    
-    // Email validation
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setLoading(true);
     try {
-      console.log('Form submitted with:', formData);
       const response = await authService.login(formData);
-
-      console.log(response)
-      
       if (response?.user) {
         dispatch(login(response.user));
         toast.success('🎉 Welcome back!');
         navigate('/', { replace: true });
         setFormData({ email: '', password: '' });
-        console.log('Login successful with:', formData);
       }
     } catch (error) {
       const errorMessage = error?.response?.data?.message || 'Invalid credentials. Please try again.';
       toast.error(`🚫 ${errorMessage}`);
-      alert('🚫 Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
+        {/* App Info */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-4 shadow-lg">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your account to continue</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome Back</h1>
+          <p className="text-gray-600 text-sm">Login to manage and sell premium textile products to hotels.</p>
         </div>
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
+            {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
                 Email Address
@@ -120,24 +92,17 @@ function Login() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                    errors.email 
-                      ? 'border-red-300 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500'
-                  }`}
-                  placeholder="Enter your email"
+                  placeholder="you@example.com"
                   autoComplete="email"
+                  className={`w-full pl-10 pr-4 py-3 border-2 outline-none rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
+                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 />
               </div>
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <span className="mr-1">⚠</span>
-                  {errors.email}
-                </p>
-              )}
+              {errors.email && <p className="text-red-500 text-sm mt-1">⚠ {errors.email}</p>}
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
                 Password
@@ -152,13 +117,11 @@ function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                    errors.password 
-                      ? 'border-red-300 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500'
-                  }`}
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
                   autoComplete="current-password"
+                  className={`w-full pl-10 pr-12 py-3 border-2 outline-none rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
+                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 />
                 <button
                   type="button"
@@ -168,20 +131,14 @@ function Login() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <span className="mr-1">⚠</span>
-                  {errors.password}
-                </p>
-              )}
+              {errors.password && <p className="text-red-500 text-sm mt-1">⚠ {errors.password}</p>}
             </div>
 
-
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center group"
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 disabled:opacity-50 flex items-center justify-center group"
             >
               {loading ? (
                 <>
@@ -198,6 +155,10 @@ function Login() {
           </form>
         </div>
 
+        {/* Footer Info */}
+        <p className="mt-6 text-center text-gray-500 text-xs">
+          © {new Date().getFullYear()} TextilePro Marketing — Empowering hotel businesses with premium textiles.
+        </p>
       </div>
     </div>
   );
