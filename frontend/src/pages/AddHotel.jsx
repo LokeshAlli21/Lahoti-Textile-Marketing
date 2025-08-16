@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Building2, User, Phone, Mail, Navigation, ArrowLeft, Edit, Save, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Building2, User, Phone, Mail, Navigation, ArrowLeft, Edit, Save, X, Check, Loader2, AlertCircle, FileText  } from 'lucide-react';
 import databaseService from '../backend-services/database/database.js';
+import { toast } from 'react-toastify';
 
 // Move FormInput component outside to prevent recreation on every render
 const FormInput = ({ 
@@ -82,7 +83,8 @@ const AddHotel = ({ viewOnly = false }) => {
     owner_alt_phone: '',
     contact_person_name: '',
     contact_person_phone: '',
-    contact_person_alt_phone: ''
+    contact_person_alt_phone: '',
+    gst_number: ''
   });
 
   // UI state
@@ -113,7 +115,8 @@ const AddHotel = ({ viewOnly = false }) => {
           owner_alt_phone: hotel.owner_alt_phone || '',
           contact_person_name: hotel.contact_person_name || '',
           contact_person_phone: hotel.contact_person_phone || '',
-          contact_person_alt_phone: hotel.contact_person_alt_phone || ''
+          contact_person_alt_phone: hotel.contact_person_alt_phone || '',
+          gst_number: hotel?.gst_number || ''
         });
       }
     } catch (error) {
@@ -153,10 +156,30 @@ const AddHotel = ({ viewOnly = false }) => {
       }
     };
 
+    // ✅ GST validation (if provided)
+    if (formData.gst_number && !/^[0-9]{2}[A-Z0-9]{13}$/.test(formData.gst_number.trim())) {
+      newErrors.gst_number = 'Please enter a valid GST number (15 characters, alphanumeric)';
+    }
+
     validatePhone(formData.owner_phone, 'owner_phone');
     validatePhone(formData.owner_alt_phone, 'owner_alt_phone');
     validatePhone(formData.contact_person_phone, 'contact_person_phone');
     validatePhone(formData.contact_person_alt_phone, 'contact_person_alt_phone');
+
+    // ✅ Require at least one phone number
+    if (
+      !formData.owner_phone &&
+      !formData.owner_alt_phone &&
+      !formData.contact_person_phone &&
+      !formData.contact_person_alt_phone
+    ) {
+      newErrors.phone_required = 'At least one phone number is required';
+    }
+
+    // Show all error messages as toasts
+    Object.values(newErrors).forEach((msg) => {
+      toast.error(msg);
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -226,7 +249,7 @@ const AddHotel = ({ viewOnly = false }) => {
         setFormData({
             name: '', address: '', latitude: '', longitude: '',
             hotel_email: '', owner_name: '', owner_phone: '', owner_alt_phone: '',
-            contact_person_name: '', contact_person_phone: '', contact_person_alt_phone: ''
+            contact_person_name: '', contact_person_phone: '', contact_person_alt_phone: '', gst_number: ''
           });
         setSuccessMessage('');
         navigate(-1); // Redirect to hotels list
@@ -292,12 +315,12 @@ const AddHotel = ({ viewOnly = false }) => {
         </div>
 
         {/* Messages */}
-        {(errors.fetch || errors.submit || errors.location) && (
+        {(errors.fetch || errors.submit || errors.location || errors.phone_required) && (
           <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
             <div className="flex items-center">
               <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
               <p className="text-red-800">
-                {errors.fetch || errors.submit || errors.location}
+                {errors.fetch || errors.submit || errors.location || errors.phone_required}
               </p>
             </div>
           </div>
@@ -344,6 +367,17 @@ const AddHotel = ({ viewOnly = false }) => {
                   onChange={handleInputChange}
                   disabled={viewOnly || loading}
                   error={errors.hotel_email}
+                />
+                <FormInput
+                  name="gst_number"
+                  label="GST Number"
+                  type="text"
+                  icon={FileText}
+                  placeholder="Enter GST number"
+                  value={formData.gst_number}
+                  onChange={handleInputChange}
+                  disabled={viewOnly || loading}
+                  error={errors.gst_number}
                 />
               </div>
               <FormInput

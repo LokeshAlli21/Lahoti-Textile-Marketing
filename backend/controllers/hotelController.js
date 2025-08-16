@@ -18,7 +18,8 @@ export const addHotel = async (req, res) => {
             owner_alt_phone,
             contact_person_name,
             contact_person_phone,
-            contact_person_alt_phone
+            contact_person_alt_phone,
+            gst_number
         } = req.body;
 
         console.log(req.body)
@@ -42,7 +43,7 @@ export const addHotel = async (req, res) => {
                 name, address, latitude, longitude,
                 hotel_email,
                 owner_name, owner_phone, owner_alt_phone,
-                contact_person_name, contact_person_phone, contact_person_alt_phone,
+                contact_person_name, contact_person_phone, contact_person_alt_phone, gst_number,
                 created_by
             )
             VALUES (
@@ -59,7 +60,7 @@ export const addHotel = async (req, res) => {
             name, address, latitude, longitude,
             hotel_email,
             owner_name, owner_phone, owner_alt_phone,
-            contact_person_name, contact_person_phone, contact_person_alt_phone,
+            contact_person_name, contact_person_phone, contact_person_alt_phone, gst_number,
             req.user?.id || null
         ]);
 
@@ -96,7 +97,7 @@ export const updateHotel = async (req, res) => {
         const fields = [
             'name', 'address', 'latitude', 'longitude', 'hotel_email',
             'owner_name', 'owner_phone', 'owner_alt_phone',
-            'contact_person_name', 'contact_person_phone', 'contact_person_alt_phone'
+            'contact_person_name', 'contact_person_phone', 'contact_person_alt_phone', gst_number
         ];
 
         // Build dynamic update query

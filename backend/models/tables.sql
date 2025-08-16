@@ -28,6 +28,7 @@ CREATE TABLE hotels (
     longitude DECIMAL(9,6) NOT NULL,
     location_fetched_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'),
     hotel_email VARCHAR(255),
+    gst_number VARCHAR(15),
     owner_name VARCHAR(150),
     owner_phone VARCHAR(20),
     owner_alt_phone VARCHAR(20),

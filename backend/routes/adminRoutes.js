@@ -7,6 +7,7 @@ import {
   getUserById,
   softDeleteUser,
   recoverUser, 
+  getHotelsForExport,
 } from '../controllers/adminController.js';
 import { protect } from '../middlewares/protect.js';
 
@@ -14,6 +15,7 @@ const router = express.Router();
 
 // Get all users (includes deleted users)
 router.get('/users', protect, getAllUsers);
+router.get('/get-hotels', protect, getHotelsForExport);
 
 // Get user by ID
 router.get('/users/:id', protect, getUserById);

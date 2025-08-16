@@ -193,6 +193,19 @@ async getHotels({
   }
 }
 
+async getHotelsForExport() {
+  try {
+    const response = await authenticatedFetch(`${this.baseUrl}/api/admin/get-hotels`, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
 async getAllUsers() {
   try {
     const response = await authenticatedFetch(`${this.baseUrl}/api/admin/users`, {

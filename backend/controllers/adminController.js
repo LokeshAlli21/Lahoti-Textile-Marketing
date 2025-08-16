@@ -38,6 +38,49 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+export const getHotelsForExport = async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        id,
+        name,
+        address,
+        latitude,
+        longitude,
+        location_fetched_at,
+        hotel_email,
+        gst_number,
+        owner_name,
+        owner_phone,
+        owner_alt_phone,
+        contact_person_name,
+        contact_person_phone,
+        contact_person_alt_phone,
+        created_at,
+        updated_at
+      FROM hotels
+      WHERE is_deleted = false
+      ORDER BY created_at DESC
+    `;
+
+    const result = await query(sql);
+
+    return res.json({
+      success: true,
+      message: 'Hotels fetched successfully',
+      data: result.rows,
+      count: result.rows.length
+    });
+
+  } catch (err) {
+    console.error('Get Hotels For Export Error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+};
+
 // Get user by ID
 export const getUserById = async (req, res) => {
     try {

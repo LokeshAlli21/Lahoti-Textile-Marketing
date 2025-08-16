@@ -1,11 +1,14 @@
 import databaseService from '../backend-services/database/database.js'
 import React, { useEffect, useState } from 'react';
-import { Plus, Building2, Users, Eye, TrendingUp, Calendar, Activity, Clock, BarChart3, MapPin, User } from 'lucide-react';
+import { Plus, Building2, Users, Eye, TrendingUp, Download , Calendar, Activity, Clock, BarChart3, MapPin, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux';
+import * as XLSX from 'xlsx';
+import { toast } from 'react-toastify';
 
 export default function Dashboard() {
 
+  const [downloadLoading, setDownloadLoading ] = useState(false)
   const userData = useSelector(state => state.auth.userData);
 
   const isAdmin = userData?.role === 'admin';
@@ -49,6 +52,37 @@ export default function Dashboard() {
     console.log('See All Hotels clicked');
     navigate('/hotels')
   };
+
+  const handleExportHotels = async () => {
+    setDownloadLoading(true)
+    try {
+      const response = await databaseService.getHotelsForExport();
+
+      if (!response.success || !response.data?.length) {
+        toast.error("No hotels found to export");
+        return;
+      }
+
+      const hotelsData = response.data;
+
+      // Convert JSON to worksheet
+      const worksheet = XLSX.utils.json_to_sheet(hotelsData);
+
+      // Create a new workbook and append the sheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Hotels");
+
+      // Export the workbook as Excel file
+      XLSX.writeFile(workbook, "hotels_export.xlsx");
+
+      toast.success(`Exported ${hotelsData.length} hotels successfully`);
+    } catch (error) {
+      console.error("Export Hotels Error:", error);
+      toast.error("Failed to export hotels data");
+    }
+    setDownloadLoading(false)
+  };
+
 
   const handleManageUsers = () => {
     console.log('Manage Users clicked');
@@ -149,6 +183,54 @@ export default function Dashboard() {
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-slate-800 mb-2">Manage Hotels</h3>
                     <p className="text-slate-600">View and edit hotel listings</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={handleExportHotels}
+                disabled={downloadLoading}
+                className={`group relative bg-white/70 backdrop-blur-sm border-2 border-slate-200 hover:border-slate-300 rounded-3xl p-8 transition-all duration-300 focus:outline-none focus:ring-4
+                  ${downloadLoading
+                    ? "cursor-not-allowed opacity-60 border-slate-200"
+                    : "hover:bg-gradient-to-br from-blue-50 to-indigo-100 hover:border-blue-300 hover:shadow-2xl hover:scale-105 focus:ring-blue-200"
+                  }`}
+              >
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-200 group-hover:from-blue-200 group-hover:to-indigo-300 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg">
+                    {downloadLoading ? (
+                      // Simple spinner
+                      <svg
+                        className="w-6 h-6 text-blue-600 animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      <Download className="w-8 h-8 text-blue-600" />
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">
+                      {downloadLoading ? "Exporting..." : "Export Hotels Data"}
+                    </h3>
+                    <p className="text-slate-600">
+                      {downloadLoading ? "Please wait while we prepare your file" : "Download all hotels as Excel"}
+                    </p>
                   </div>
                 </div>
               </button>
