@@ -5,6 +5,7 @@ import { loggerMiddleware } from './middlewares/loggerMiddleware.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import hotelRoutes from './routes/hotelRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import hotelDashboardRoutes from './routes/hotelDashboardRoutes.js';
 import {connectDB} from './services/dbClient.js'
 
@@ -30,6 +31,7 @@ app.get('/api/test', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/hotel', hotelRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/hotel-dashboard', hotelDashboardRoutes);
 
 // Main route

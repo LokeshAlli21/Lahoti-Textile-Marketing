@@ -193,6 +193,76 @@ async getHotels({
   }
 }
 
+async getAllUsers() {
+  try {
+    const response = await authenticatedFetch(`${this.baseUrl}/api/admin/users`, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
+async createUser(userData) {
+  try {
+    const response = await authenticatedFetch(`${this.baseUrl}/api/admin/users`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+}
+
+async updateUser(userId, userData) {
+  try {
+    const response = await authenticatedFetch(`${this.baseUrl}/api/admin/users/${userId}`, {
+      method: "PUT",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+}
+
+async deleteUser(userId) {
+  try {
+    const response = await authenticatedFetch(`${this.baseUrl}/api/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+}
+
+async recoverUser(userId) {
+  try {
+    const response = await authenticatedFetch(
+      `${this.baseUrl}/api/admin/users/${userId}/recover`,
+      {
+        method: "PATCH",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    return this.handleResponse(response);
+  } catch (error) {
+    console.error("Error recovering user:", error);
+    throw error;
+  }
+}
+
 }
 
 const databaseService = new DatabaseService();

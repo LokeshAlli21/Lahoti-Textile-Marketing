@@ -106,7 +106,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-slate-500">Welcome back, {userData?.name || 'User'}</p>
+                <p className="text-sm text-slate-500">Welcome back, {userData?.full_name || 'User'}</p>
                 <p className="text-sm font-medium text-slate-700 capitalize">
                   {userData?.role || 'User'} Dashboard
                 </p>

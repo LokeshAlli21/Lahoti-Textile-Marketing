@@ -13,6 +13,7 @@ import {
   AddHotel,
   Dashboard,
   Hotels,
+  ManageUsers,
 } from './pages/index.js'
 
 const router = createBrowserRouter([
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
         <AuthLayout authentication>
           {" "}
           <AddHotel viewOnly={false} />
+         </AuthLayout>, 
+      },
+      {
+        path: "/users",
+        element: 
+        <AuthLayout authentication>
+          {" "}
+          <ManageUsers />
          </AuthLayout>, 
       },
     ],
