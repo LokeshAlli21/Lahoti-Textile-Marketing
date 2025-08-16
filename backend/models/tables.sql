@@ -11,6 +11,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     phone VARCHAR(20),
+    role VARCHAR(20) DEFAULT 'user',
     created_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')
 );
 
@@ -303,3 +304,110 @@ UNION ALL
 )
 ORDER BY activity_date DESC
 LIMIT 20;
+
+
+-- Function to get user-specific dashboard summary
+-- Usage: SELECT * FROM get_user_dashboard_summary(1);
+CREATE OR REPLACE FUNCTION get_user_dashboard_summary(p_user_id INTEGER)
+RETURNS TABLE(
+    -- Hotel Statistics (user-specific)
+    total_hotels BIGINT,
+    active_hotels BIGINT,
+    deleted_hotels BIGINT,
+    hotels_added_today BIGINT,
+    hotels_added_week BIGINT,
+    hotels_added_month BIGINT,
+    
+    -- Visit Statistics (user-specific)
+    total_visits BIGINT,
+    visits_today BIGINT,
+    visits_week BIGINT,
+    visits_month BIGINT,
+    unique_hotels_visited BIGINT,
+    
+    -- Activity Rates
+    hotel_visit_rate_percent NUMERIC(5,2),
+    
+    -- Recent Activity
+    last_hotel_added TIMESTAMP,
+    last_visit_date TIMESTAMP,
+    
+    -- Current timestamp
+    dashboard_generated_at TIMESTAMP
+) AS $$
+BEGIN
+    RETURN QUERY
+    WITH user_hotel_stats AS (
+        SELECT 
+            COUNT(*) as total_hotels,
+            COUNT(CASE WHEN is_deleted = false THEN 1 END) as active_hotels,
+            COUNT(CASE WHEN is_deleted = true THEN 1 END) as deleted_hotels,
+            COUNT(CASE WHEN created_at >= CURRENT_DATE THEN 1 END) as hotels_added_today,
+            COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as hotels_added_week,
+            COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as hotels_added_month
+        FROM hotels
+        WHERE created_by = p_user_id
+    ),
+    user_visit_stats AS (
+        SELECT 
+            COUNT(*) as total_visits,
+            COUNT(CASE WHEN visit_date >= CURRENT_DATE THEN 1 END) as visits_today,
+            COUNT(CASE WHEN visit_date >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as visits_week,
+            COUNT(CASE WHEN visit_date >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as visits_month,
+            COUNT(DISTINCT hotel_id) as unique_hotels_visited
+        FROM visits
+        WHERE visited_by = p_user_id
+    ),
+    user_recent_activity AS (
+        SELECT 
+            MAX(h.created_at) as last_hotel_added,
+            MAX(v.visit_date) as last_visit_date
+        FROM hotels h
+        FULL OUTER JOIN visits v ON v.visited_by = p_user_id
+        WHERE h.created_by = p_user_id AND h.is_deleted = false
+    )
+    SELECT 
+        -- Hotel Statistics
+        hs.total_hotels,
+        hs.active_hotels,
+        hs.deleted_hotels,
+        hs.hotels_added_today,
+        hs.hotels_added_week,
+        hs.hotels_added_month,
+        
+        -- Visit Statistics
+        vs.total_visits,
+        vs.visits_today,
+        vs.visits_week,
+        vs.visits_month,
+        vs.unique_hotels_visited,
+        
+        -- Activity Rates
+        ROUND(
+            CASE 
+                WHEN hs.active_hotels > 0 THEN (vs.unique_hotels_visited::decimal / hs.active_hotels * 100)
+                ELSE 0 
+            END, 2
+        ) as hotel_visit_rate_percent,
+        
+        -- Recent Activity
+        ra.last_hotel_added,
+        ra.last_visit_date,
+        
+        -- Current timestamp for dashboard refresh
+        CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata' as dashboard_generated_at
+        
+    FROM user_hotel_stats hs
+    CROSS JOIN user_visit_stats vs
+    CROSS JOIN user_recent_activity ra;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to set current user context (if you decide to use the view approach later)
+CREATE OR REPLACE FUNCTION set_current_user_context(p_user_id INTEGER)
+RETURNS VOID AS $$
+BEGIN
+    -- Set the user context in a session variable
+    PERFORM set_config('app.current_user_id', p_user_id::text, false);
+END;
+$$ LANGUAGE plpgsql;

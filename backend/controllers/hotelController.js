@@ -340,7 +340,7 @@ export const softDeleteHotel = async (req, res) => {
     }
 };
 
-export const getDashboardView = async (req, res) => {
+export const getDashboardViewForAdmin = async (req, res) => {
 
     try {
         // Query for dashboard summary
@@ -374,6 +374,84 @@ export const getDashboardView = async (req, res) => {
     } catch (error) {
         console.error('Get Dashboard View Error:', error);
         res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+export const getDashboardViewForUser = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Validate user ID
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid user ID provided' 
+            });
+        }
+
+        const userId = parseInt(id);
+
+        // Query for user-specific dashboard summary
+        const dashboardSummaryQuery = `
+            SELECT * FROM get_user_dashboard_summary($1)
+        `;
+        
+        // Direct query for user-specific recent activities (last 7 days)
+        const recentActivitiesQuery = `
+            (
+                SELECT 
+                    'hotel_created' as activity_type,
+                    h.name as item_name,
+                    u.full_name as user_name,
+                    h.created_at as activity_date,
+                    'You created hotel "' || h.name || '"' as description
+                FROM hotels h
+                JOIN users u ON h.created_by = u.id
+                WHERE h.created_by = $1
+                  AND h.created_at >= CURRENT_DATE - INTERVAL '7 days'
+                  AND h.is_deleted = false
+            )
+            UNION ALL
+            (
+                SELECT 
+                    'hotel_visit' as activity_type,
+                    h.name as item_name,
+                    u.full_name as user_name,
+                    v.visit_date as activity_date,
+                    'You visited "' || h.name || '"' as description
+                FROM visits v
+                JOIN hotels h ON v.hotel_id = h.id
+                JOIN users u ON v.visited_by = u.id
+                WHERE v.visited_by = $1
+                  AND v.visit_date >= CURRENT_DATE - INTERVAL '7 days'
+            )
+            ORDER BY activity_date DESC
+            LIMIT 10
+        `;
+
+        // Execute both queries concurrently
+        const [summaryResult, activitiesResult] = await Promise.all([
+            query(dashboardSummaryQuery, [userId]),
+            query(recentActivitiesQuery, [userId])
+        ]);
+
+        // Structure the response data
+        const dashboardData = {
+            summary: summaryResult.rows[0] || null,
+            recentActivities: activitiesResult.rows || []
+        };
+
+        res.json({
+            success: true,
+            dashboard: dashboardData
+        });
+
+    } catch (error) {
+        console.error('Get Dashboard View Error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal Server Error' 
+        });
     }
 };
 

@@ -13,7 +13,7 @@ export const login = async (req, res) => {
 
         // Get user from database
         const sql = `
-            SELECT id, full_name, email, phone, password_hash, created_at
+            SELECT id, full_name, email, phone, password_hash, created_at, role
             FROM users
             WHERE email = $1
             LIMIT 1
@@ -54,7 +54,8 @@ export const login = async (req, res) => {
                 full_name: user.full_name,
                 email: user.email,
                 phone: user.phone,
-                created_at: user.created_at
+                created_at: user.created_at,
+                role: user.role
             },
             token
         });
@@ -75,7 +76,7 @@ export const getUser = async (req, res) => {
         }
 
         const sql = `
-            SELECT id, full_name, email, phone, created_at
+            SELECT id, full_name, email, phone, created_at, role
             FROM users
             WHERE id = $1
             LIMIT 1
@@ -121,7 +122,7 @@ export const updateProfile = async (req, res) => {
             UPDATE users 
             SET full_name = $1, phone = $2
             WHERE id = $3
-            RETURNING id, full_name, email, phone, created_at
+            RETURNING id, full_name, email, phone, created_at, role
         `;
 
         const result = await query(sql, [
@@ -192,7 +193,7 @@ export const changePassword = async (req, res) => {
             UPDATE users 
             SET password_hash = $1
             WHERE id = $2
-            RETURNING id, full_name, email
+            RETURNING id, full_name, email, role
         `;
 
         const result = await query(updateSql, [newPasswordHash, req.user.id]);
@@ -246,7 +247,7 @@ export const getAllUsers = async (req, res) => {
 
         const sql = `
             SELECT 
-                u.id, u.full_name, u.email, u.phone, u.created_at
+                u.id, u.full_name, u.email, u.phone, u.created_at, role
                 COUNT(h.id) as hotels_created,
                 COUNT(v.id) as total_visits
             FROM users u

@@ -52,9 +52,23 @@ class DatabaseService {
     }
   }
 
-  async getDashboardView() {
+  async getDashboardViewForAdmin() {
     try {
       const response = await authenticatedFetch(`${this.baseUrl}/api/hotel-dashboard/get-view`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
+      console.log(response)
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error("Error fetching dashboard view:", error);
+      throw error;
+    }
+  }
+
+  async getDashboardViewForUser(id) {
+    try {
+      const response = await authenticatedFetch(`${this.baseUrl}/api/hotel-dashboard/get-view-for-user/${id}`, {
         method: "GET",
         headers: this.getAuthHeaders(),
       });

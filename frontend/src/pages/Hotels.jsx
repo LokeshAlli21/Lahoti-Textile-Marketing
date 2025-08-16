@@ -232,7 +232,7 @@ function Hotels() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Hotels Management
               </h1>
-              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage your hotel portfolio with ease</p>
+              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage all the hotels with ease</p>
             </div>
             <button
               onClick={() => navigate('/hotel/add')}

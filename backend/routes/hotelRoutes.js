@@ -6,7 +6,6 @@ import {
   getHotels,
   getHotelById,
   softDeleteHotel,
-  getDashboardView,
 } from '../controllers/hotelController.js';
 import { protect } from '../middlewares/protect.js';
 
@@ -26,7 +25,5 @@ router.get('/:id', protect, getHotelById);
 
 // Soft delete hotel
 router.delete('/:id', protect, softDeleteHotel);
-
-router.get('/get-dashboard-view', protect, getDashboardView)
 
 export default router;
