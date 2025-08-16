@@ -197,6 +197,7 @@ export const getHotelById = async (req, res) => {
 
 /**
  * Fetch all hotels with pagination, search, and filters
+ * Role-based access: Admin sees all, Users see only their created hotels
  */
 export const getHotels = async (req, res) => {
     try {
@@ -207,8 +208,32 @@ export const getHotels = async (req, res) => {
             created_by = '',      // filter by creator
             sort_by = 'created_at', // sort field
             sort_order = 'DESC',  // sort order
-            include_deleted = 'false' // include soft deleted hotels
+            include_deleted = 'false', // include soft deleted hotels
+            user_id             // user ID from req.query
         } = req.query;
+
+        // Validate user_id
+        if (!user_id || isNaN(parseInt(user_id))) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'User ID is required and must be valid' 
+            });
+        }
+
+        const userId = parseInt(user_id);
+
+        // Get user role from database
+        const userRoleQuery = `SELECT role FROM users WHERE id = $1`;
+        const userRoleResult = await query(userRoleQuery, [userId]);
+        
+        if (userRoleResult.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'User not found' 
+            });
+        }
+
+        const userRole = userRoleResult.rows[0].role;
 
         // Validate pagination parameters
         const pageNum = Math.max(1, parseInt(page, 10) || 1);
@@ -230,6 +255,14 @@ export const getHotels = async (req, res) => {
             whereParts.push(`h.is_deleted = false`);
         }
 
+        // Role-based access control
+        if (userRole !== 'admin') {
+            // Non-admin users can only see hotels they created
+            params.push(userId);
+            whereParts.push(`h.created_by = $${params.length}`);
+        }
+        // If user is admin, they can see all hotels (no additional filter)
+
         // Search by name, address, or owner name
         if (search.trim()) {
             params.push(`%${search.trim()}%`);
@@ -240,8 +273,8 @@ export const getHotels = async (req, res) => {
             )`);
         }
 
-        // Filter by creator
-        if (created_by.trim()) {
+        // Filter by creator (only if admin is making this filter request)
+        if (created_by.trim() && userRole === 'admin') {
             params.push(created_by);
             whereParts.push(`h.created_by = $${params.length}`);
         }
@@ -287,11 +320,15 @@ export const getHotels = async (req, res) => {
             page: pageNum,
             limit: limitNum,
             totalPages: Math.ceil(total / limitNum),
-            hotels: result.rows
+            hotels: result.rows,
+            userRole: userRole // Include user role in response for frontend reference
         });
     } catch (error) {
         console.error('Get Hotels Error:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal Server Error' 
+        });
     }
 };
 

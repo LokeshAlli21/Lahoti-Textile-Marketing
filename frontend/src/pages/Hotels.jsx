@@ -1,8 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import databaseService from '../backend-services/database/database.js'
+import { useSelector } from 'react-redux';
 
 function Hotels() {
+
+  const userData = useSelector(state => state.auth.userData);
+
+  const isAdmin = userData?.role === 'admin';
+  const user_id = userData?.id
+
   const navigate = useNavigate()
   const [hotels, setHotels] = useState([])
   const [loading, setLoading] = useState(false)
@@ -24,7 +31,8 @@ function Hotels() {
         limit,
         search: searchTerm,
         sort_by: sort,
-        sort_order: order
+        sort_order: order,
+        user_id
       })
       setHotels(data.hotels || [])
       setTotalPages(data.totalPages || 1)

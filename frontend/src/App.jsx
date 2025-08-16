@@ -1,13 +1,16 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import authService from './backend-services/auth/auth';
 import { login, logout} from './store/authSlice'
 import Footer from './components/Footer';
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   const dispatch = useDispatch();
+
+  const userData = useSelector(state => state.auth.userData);
 
   const navigate = useNavigate();
 
@@ -30,6 +33,10 @@ function App() {
       return
     })
   }, [])
+
+  if(userData?.is_deleted){
+    return <NotFoundPage />
+  }
 
   return (
     <div className="max-w-screen w-full">

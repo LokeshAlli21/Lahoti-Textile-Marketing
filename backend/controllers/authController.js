@@ -13,9 +13,9 @@ export const login = async (req, res) => {
 
         // Get user from database
         const sql = `
-            SELECT id, full_name, email, phone, password_hash, created_at, role
+            SELECT id, full_name, email, phone, password_hash, created_at, role, is_deleted
             FROM users
-            WHERE email = $1
+            WHERE email = $1 AND is_deleted = false
             LIMIT 1
         `;
         const result = await query(sql, [email.toLowerCase().trim()]);
@@ -55,7 +55,8 @@ export const login = async (req, res) => {
                 email: user.email,
                 phone: user.phone,
                 created_at: user.created_at,
-                role: user.role
+                role: user.role,
+                is_deleted: user.is_deleted
             },
             token
         });
@@ -76,7 +77,7 @@ export const getUser = async (req, res) => {
         }
 
         const sql = `
-            SELECT id, full_name, email, phone, created_at, role
+            SELECT id, full_name, email, phone, created_at, role, is_deleted
             FROM users
             WHERE id = $1
             LIMIT 1
@@ -122,7 +123,7 @@ export const updateProfile = async (req, res) => {
             UPDATE users 
             SET full_name = $1, phone = $2
             WHERE id = $3
-            RETURNING id, full_name, email, phone, created_at, role
+            RETURNING id, full_name, email, phone, created_at, role, is_deleted
         `;
 
         const result = await query(sql, [
@@ -193,7 +194,7 @@ export const changePassword = async (req, res) => {
             UPDATE users 
             SET password_hash = $1
             WHERE id = $2
-            RETURNING id, full_name, email, role
+            RETURNING id, full_name, email, role, is_deleted
         `;
 
         const result = await query(updateSql, [newPasswordHash, req.user.id]);
@@ -333,7 +334,7 @@ export const createUserManually = async (userData) => {
         const sql = `
             INSERT INTO users (full_name, email, password_hash, phone)
             VALUES ($1, $2, $3, $4)
-            RETURNING id, full_name, email, phone, created_at
+            RETURNING id, full_name, email, phone, created_at, role, is_deleted
         `;
 
         const result = await query(sql, [

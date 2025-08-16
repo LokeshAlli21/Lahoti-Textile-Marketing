@@ -19,7 +19,7 @@ export const protect = async (req, res, next) => {
             }
 
             // Get the user from DB
-            const result = await query('SELECT id, full_name, email, phone, created_at FROM users WHERE id = $1', [decoded.id]);
+            const result = await query('SELECT id, full_name, email, phone, created_at FROM users WHERE id = $1 AND is_deleted = false', [decoded.id]);
 
             if (result.rows.length === 0) {
                 return res.status(401).json({ message: 'User not found' });

@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS visits CASCADE;
 DROP TABLE IF EXISTS hotels CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
+CREATE INDEX idx_users_is_deleted ON users(is_deleted);
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     full_name VARCHAR(150) NOT NULL,
@@ -12,6 +14,8 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     phone VARCHAR(20),
     role VARCHAR(20) DEFAULT 'user',
+    is_deleted BOOLEAN DEFAULT false,
+    deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')
 );
 
@@ -125,12 +129,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for users table
-CREATE TRIGGER trigger_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
 -- Create triggers for hotels table
 CREATE TRIGGER trigger_hotels_updated_at
     BEFORE UPDATE ON hotels
@@ -192,6 +190,7 @@ user_stats AS (
         COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as users_added_week,
         COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as users_added_month
     FROM users
+    WHERE is_deleted = false
 ),
 visit_stats AS (
     SELECT 
@@ -301,6 +300,7 @@ UNION ALL
         CONCAT('New user "', u.full_name, '" registered') as description
     FROM users u
     WHERE u.created_at >= CURRENT_DATE - INTERVAL '7 days'
+    AND u.is_deleted = false
 )
 ORDER BY activity_date DESC
 LIMIT 20;

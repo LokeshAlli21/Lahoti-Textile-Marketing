@@ -229,7 +229,7 @@ export default function Dashboard() {
             </div>
 
             {/* Active Hotels */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-slate-200/50">
+            {/* <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-slate-200/50">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-emerald-600" />
@@ -245,7 +245,7 @@ export default function Dashboard() {
               <div className="mt-3 text-xs text-slate-500">
                 {summary.deleted_hotels || '0'} deleted
               </div>
-            </div>
+            </div> */}
 
             {/* Total Users */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-slate-200/50">

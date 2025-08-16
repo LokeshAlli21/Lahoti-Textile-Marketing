@@ -140,7 +140,8 @@ async getHotels({
   created_by = "",
   sort_by = "created_at",
   sort_order = "DESC",
-  include_deleted = false
+  include_deleted = false,
+  user_id
 } = {}) {
   try {
     console.log("Fetching hotels with parameters:", {
@@ -150,7 +151,8 @@ async getHotels({
       created_by,
       sort_by,
       sort_order,
-      include_deleted
+      include_deleted,
+      user_id
     });
 
     // Build query parameters
@@ -161,7 +163,8 @@ async getHotels({
       created_by: created_by.trim(),
       sort_by,
       sort_order,
-      include_deleted: include_deleted.toString()
+      include_deleted: include_deleted.toString(),
+      user_id
     });
 
     // Send request to backend
