@@ -44,7 +44,7 @@ export default function Dashboard() {
   }, [userData]);
 
   const handleAddHotel = () => {
-    console.log('Add Hotel clicked');
+    console.log('Add clicked');
     navigate('/hotel/add')
   };
 
@@ -132,10 +132,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Textile Hotel Marketing Hub
+                Textile Marketing Hub
               </h1>
               <p className="text-slate-600 mt-2">
-                {isAdmin ? 'Admin Dashboard - Manage your hotel network' : 'User Dashboard - Track your hotel activities'}
+                {isAdmin ? 'Admin Dashboard - Manage your network' : 'User Dashboard - Track your activities'}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -166,8 +166,8 @@ export default function Dashboard() {
                     <Plus className="w-8 h-8 text-indigo-600" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Add New Hotel</h3>
-                    <p className="text-slate-600">Register and onboard hotels</p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Add New</h3>
+                    <p className="text-slate-600">Register and onboard</p>
                   </div>
                 </div>
               </button>
@@ -181,8 +181,8 @@ export default function Dashboard() {
                     <Building2 className="w-8 h-8 text-emerald-600" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Manage Hotels</h3>
-                    <p className="text-slate-600">View and edit hotel listings</p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Manage listings </h3>
+                    <p className="text-slate-600">View and edit </p>
                   </div>
                 </div>
               </button>
@@ -226,10 +226,10 @@ export default function Dashboard() {
                   </div>
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-slate-800 mb-2">
-                      {downloadLoading ? "Exporting..." : "Export Hotels Data"}
+                      {downloadLoading ? "Exporting..." : "Export Data"}
                     </h3>
                     <p className="text-slate-600">
-                      {downloadLoading ? "Please wait while we prepare your file" : "Download all hotels as Excel"}
+                      {downloadLoading ? "Please wait while we prepare your file" : "Download all data as Excel"}
                     </p>
                   </div>
                 </div>
@@ -263,8 +263,8 @@ export default function Dashboard() {
                     <Plus className="w-8 h-8 text-indigo-600" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Add New Hotel</h3>
-                    <p className="text-slate-600">Register and onboard hotels</p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Add New </h3>
+                    <p className="text-slate-600">Register and onboard </p>
                   </div>
                 </div>
               </button>
@@ -278,8 +278,8 @@ export default function Dashboard() {
                     <Building2 className="w-8 h-8 text-emerald-600" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Manage Hotels</h3>
-                    <p className="text-slate-600">View and edit hotel listings <b>you added</b></p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Manage listings</h3>
+                    <p className="text-slate-600">View and edit  <b>you added</b></p>
                   </div>
                 </div>
               </button>
@@ -304,7 +304,7 @@ export default function Dashboard() {
               <div className="text-3xl font-bold text-slate-800 mb-1">
                 {summary.total_hotels || '0'}
               </div>
-              <p className="text-slate-600 text-sm">Total Hotels</p>
+              <p className="text-slate-600 text-sm">Total </p>
               <div className="mt-3 text-xs text-emerald-600">
                 +{summary.hotels_added_month || '0'} this month
               </div>
@@ -323,7 +323,7 @@ export default function Dashboard() {
               <div className="text-3xl font-bold text-slate-800 mb-1">
                 {summary.active_hotels || '0'}
               </div>
-              <p className="text-slate-600 text-sm">Active Hotels</p>
+              <p className="text-slate-600 text-sm">Active </p>
               <div className="mt-3 text-xs text-slate-500">
                 {summary.deleted_hotels || '0'} deleted
               </div>
@@ -364,7 +364,7 @@ export default function Dashboard() {
               <div className="text-3xl font-bold text-slate-800 mb-1">
                 {summary.total_hotels || '0'}
               </div>
-              <p className="text-slate-600 text-sm">Hotels Available</p>
+              <p className="text-slate-600 text-sm"> Available</p>
               <div className="mt-3 text-xs text-emerald-600">
                 +{summary.hotels_added_month || '0'} added this month
               </div>
@@ -396,7 +396,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-slate-200/50">
               <div className="text-lg font-bold text-slate-800">{summary.hotels_added_week || '0'}</div>
-              <div className="text-xs text-slate-600">Hotels This Week</div>
+              <div className="text-xs text-slate-600"> This Week</div>
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-slate-200/50">
               <div className="text-lg font-bold text-slate-800">{summary.users_added_week || '0'}</div>
@@ -404,18 +404,18 @@ export default function Dashboard() {
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-slate-200/50">
               <div className="text-lg font-bold text-slate-800">{summary.hotels_added_today || '0'}</div>
-              <div className="text-xs text-slate-600">Hotels Today</div>
+              <div className="text-xs text-slate-600"> Today</div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-slate-200/50">
               <div className="text-lg font-bold text-slate-800">{summary.hotels_added_week || '0'}</div>
-              <div className="text-xs text-slate-600">New Hotels This Week</div>
+              <div className="text-xs text-slate-600">New This Week</div>
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-slate-200/50">
               <div className="text-lg font-bold text-slate-800">{summary.hotels_added_today || '0'}</div>
-              <div className="text-xs text-slate-600">New Hotels Today</div>
+              <div className="text-xs text-slate-600">New Today</div>
             </div>
           </div>
         )}
@@ -427,7 +427,7 @@ export default function Dashboard() {
               <Activity className="w-6 h-6 text-indigo-600" />
               Recent Activities
             </h3>
-            <span className="text-sm text-slate-500">Last 24 hours</span>
+            {/*<span className="text-sm text-slate-500">Last 24 hours</span> */}
           </div>
           
           <div className="space-y-4">
@@ -472,12 +472,12 @@ export default function Dashboard() {
           <p className="text-sm text-slate-500">
             {isAdmin ? (
               <>
-                Last hotel added: {formatDate(summary.last_hotel_added)} • 
+                Last added: {formatDate(summary.last_hotel_added)} • 
                 Last user registered: {formatDate(summary.last_user_registered)}
               </>
             ) : (
               <>
-                Last hotel added: {formatDate(summary.last_hotel_added)}
+                Last added: {formatDate(summary.last_hotel_added)}
               </>
             )}
           </p>

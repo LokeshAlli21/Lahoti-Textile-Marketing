@@ -24,6 +24,10 @@ CREATE TABLE hotels (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     address TEXT,
+    state VARCHAR(100)L,      -- ✅ State (required)
+    city VARCHAR(100),       -- ✅ City (required)
+    pincode VARCHAR(6),      -- ✅ Indian pincode (6 digits)
+    category VARCHAR(50) NOT NULL,
     latitude DECIMAL(9,6) NOT NULL,  -- e.g., 17.123456
     longitude DECIMAL(9,6) NOT NULL,
     location_fetched_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'),

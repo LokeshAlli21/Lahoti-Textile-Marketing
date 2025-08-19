@@ -19,6 +19,10 @@ export const addHotel = async (req, res) => {
             contact_person_name,
             contact_person_phone,
             contact_person_alt_phone,
+            state,
+            city,
+            pincode,
+            category,
             gst_number
         } = req.body;
 
@@ -28,6 +32,12 @@ export const addHotel = async (req, res) => {
         if (!name || !latitude || !longitude) {
             return res.status(400).json({ 
                 message: 'Hotel name, latitude, and longitude are required' 
+            });
+        }
+
+        if(!category){
+            return res.status(400).json({ 
+                message: 'category is required' 
             });
         }
 
@@ -43,7 +53,8 @@ export const addHotel = async (req, res) => {
                 name, address, latitude, longitude,
                 hotel_email,
                 owner_name, owner_phone, owner_alt_phone,
-                contact_person_name, contact_person_phone, contact_person_alt_phone, gst_number,
+                contact_person_name, contact_person_phone, contact_person_alt_phone,
+                gst_number, state, city, pincode, category,
                 created_by
             )
             VALUES (
@@ -51,7 +62,8 @@ export const addHotel = async (req, res) => {
                 $5,
                 $6, $7, $8,
                 $9, $10, $11,
-                $12
+                $12, $13, $14, $15, $16,
+                $17
             )
             RETURNING *
         `;
@@ -60,7 +72,10 @@ export const addHotel = async (req, res) => {
             name, address, latitude, longitude,
             hotel_email,
             owner_name, owner_phone, owner_alt_phone,
-            contact_person_name, contact_person_phone, contact_person_alt_phone, gst_number,
+            contact_person_name, contact_person_phone, contact_person_alt_phone, gst_number, state,
+            city,
+            pincode,
+            category,
             req.user?.id || null
         ]);
 
@@ -97,7 +112,10 @@ export const updateHotel = async (req, res) => {
         const fields = [
             'name', 'address', 'latitude', 'longitude', 'hotel_email',
             'owner_name', 'owner_phone', 'owner_alt_phone',
-            'contact_person_name', 'contact_person_phone', 'contact_person_alt_phone', gst_number
+            'contact_person_name', 'contact_person_phone', 'contact_person_alt_phone', "gst_number",'state',
+            'city',
+            'pincode',
+            'category',
         ];
 
         // Build dynamic update query

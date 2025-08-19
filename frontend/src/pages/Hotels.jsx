@@ -97,9 +97,9 @@ function Hotels() {
           </div>
         </div>
         <div className="flex items-center gap-1 ml-2">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+          {/* <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
             {hotel.total_visits || 0} visits
-          </span>
+          </span> */}
         </div>
       </div>
 
@@ -179,9 +179,9 @@ function Hotels() {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
             <h3 className="font-semibold text-gray-900 truncate pr-2">{hotel.name}</h3>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+            {/* <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
               {hotel.total_visits || 0}
-            </span>
+            </span> */}
           </div>
           
           <div className="text-sm text-gray-600 space-y-1">
@@ -238,9 +238,9 @@ function Hotels() {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
             <div className="text-center sm:text-left">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Hotels Management
+                Management page
               </h1>
-              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage all the hotels with ease</p>
+              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage all the listings with ease</p>
             </div>
             <button
               onClick={() => navigate('/hotel/add')}
@@ -249,7 +249,7 @@ function Hotels() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add New Hotel
+              Add New
             </button>
           </div>
 
@@ -327,7 +327,7 @@ function Hotels() {
             {/* Sort Options - Mobile Friendly */}
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="text-xs text-gray-600 mr-2 self-center">Sort by:</span>
-              {['created_at', 'name', 'total_visits'].map((field) => (
+              {['created_at', 'name'].map((field) => (
                 <button
                   key={field}
                   onClick={() => handleSort(field)}
@@ -337,7 +337,7 @@ function Hotels() {
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  {field === 'created_at' ? 'Date' : field === 'total_visits' ? 'Visits' : 'Name'}
+                  {field === 'created_at' ? 'Date' : 'Name'}
                   {sortBy === field && (
                     <span className="ml-1">
                       {sortOrder === 'ASC' ? '↑' : '↓'}

@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Building2, User, Phone, Mail, Navigation, ArrowLeft, Edit, Save, X, Check, Loader2, AlertCircle, FileText  } from 'lucide-react';
+import { MapPin, Building2, User, Phone, Mail, Navigation, ArrowLeft, Edit, Save, X, Check, Loader2, AlertCircle, FileText, Globe, Building  } from 'lucide-react';
 import databaseService from '../backend-services/database/database.js';
 import { toast } from 'react-toastify';
+import indianCitiesData from "../backend-services/database/Indian_Cities_In_States.json";
 
 // Move FormInput component outside to prevent recreation on every render
 const FormInput = ({ 
@@ -66,10 +67,77 @@ const FormInput = ({
   </div>
 );
 
+const FormSelect = ({
+  name,
+  label,
+  required = false,
+  icon: Icon,
+  value,
+  onChange,
+  disabled,
+  error,
+  options = [], // [{ value: 'MH', label: 'Maharashtra' }]
+  placeholder = "Select an option",
+}) => (
+  <div className="space-y-2">
+    {/* Label */}
+    <label htmlFor={name} className="flex items-center text-sm font-medium text-slate-700">
+      {Icon && <Icon className="w-4 h-4 mr-2 text-slate-500" />}
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+
+    {/* Select */}
+    <select
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 
+        focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500
+        ${error ? "border-red-300 bg-red-50" : "border-slate-200 bg-white hover:border-slate-300"}
+        ${disabled ? "bg-slate-50 cursor-not-allowed" : ""}`}
+    >
+      {/* Placeholder option */}
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+
+    {/* Error */}
+    {error && (
+      <div className="flex items-center space-x-2 text-red-600">
+        <AlertCircle className="w-4 h-4" />
+        <span className="text-sm">{error}</span>
+      </div>
+    )}
+  </div>
+);
+
+export const getCitiesByState = (stateName) => {
+  if (!stateName || !indianCitiesData[stateName]) {
+    return [];
+  }
+
+  return indianCitiesData[stateName].map((city) => ({
+    value: city.toLowerCase().replace(/\s+/g, "_"), // for form values
+    label: city, // for display
+  }));
+};
+
+
 const AddHotel = ({ viewOnly = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const userData = useSelector(state => state.auth.userData);
+  // state hook for cities
+  const [cityOptions, setCityOptions] = useState([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -84,7 +152,11 @@ const AddHotel = ({ viewOnly = false }) => {
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_alt_phone: '',
-    gst_number: ''
+    gst_number: '',
+    state:'',
+    city: '',
+    pincode:'',
+    category: '',
   });
 
   // UI state
@@ -116,7 +188,11 @@ const AddHotel = ({ viewOnly = false }) => {
           contact_person_name: hotel.contact_person_name || '',
           contact_person_phone: hotel.contact_person_phone || '',
           contact_person_alt_phone: hotel.contact_person_alt_phone || '',
-          gst_number: hotel?.gst_number || ''
+          gst_number: hotel?.gst_number || '',
+          state: hotel?.state || '',
+          city: hotel?.city || '',
+          pincode: hotel?.pincode || '',
+          category: hotel?.category || '',
         });
       }
     } catch (error) {
@@ -150,6 +226,21 @@ const AddHotel = ({ viewOnly = false }) => {
       newErrors.hotel_email = 'Please enter a valid email address';
     }
 
+    // ✅ Category validation (required)
+    if (!formData.category || formData.category.trim() === "") {
+      newErrors.category = "Please select a business category";
+    }
+    
+    // ✅ State validation (required)
+    if (!formData.state || formData.state.trim() === "") {
+      newErrors.state = "Please select a state";
+    }
+
+    // ✅ City validation (required)
+    if (!formData.city || formData.city.trim() === "") {
+      newErrors.city = "Please select a city";
+    }
+
     const validatePhone = (phone, fieldName) => {
       if (phone && !/^\d{10}$/.test(phone.replace(/\s+/g, ''))) {
         newErrors[fieldName] = 'Please enter a valid 10-digit phone number';
@@ -159,6 +250,11 @@ const AddHotel = ({ viewOnly = false }) => {
     // ✅ GST validation (if provided)
     if (formData.gst_number && !/^[0-9]{2}[A-Z0-9]{13}$/.test(formData.gst_number.trim())) {
       newErrors.gst_number = 'Please enter a valid GST number (15 characters, alphanumeric)';
+    }
+
+    // ✅ Pincode validation (if provided)
+    if (formData.pincode && !/^[1-9][0-9]{5}$/.test(formData.pincode.trim())) {
+      newErrors.pincode = 'Please enter a valid 6-digit pincode';
     }
 
     validatePhone(formData.owner_phone, 'owner_phone');
@@ -249,7 +345,7 @@ const AddHotel = ({ viewOnly = false }) => {
         setFormData({
             name: '', address: '', latitude: '', longitude: '',
             hotel_email: '', owner_name: '', owner_phone: '', owner_alt_phone: '',
-            contact_person_name: '', contact_person_phone: '', contact_person_alt_phone: '', gst_number: ''
+            contact_person_name: '', contact_person_phone: '', contact_person_alt_phone: '', gst_number: '', state: '', city: '', pincode: '', category: ''
           });
         setSuccessMessage('');
         navigate(-1); // Redirect to hotels list
@@ -266,20 +362,30 @@ const AddHotel = ({ viewOnly = false }) => {
     }
   };
 
+  // when state changes, update city options
+  useEffect(() => {
+    // formData.city = ''
+    if (formData.state) {
+      setCityOptions(getCitiesByState(formData.state));
+    } else {
+      setCityOptions([]);
+    }
+  }, [formData.state]);
+
   const getTitle = () => {
     switch (mode) {
-      case 'add': return 'Add New Hotel';
-      case 'edit': return 'Edit Hotel';
-      case 'view': return 'Hotel Details';
-      default: return 'Hotel Management';
+      case 'add': return 'Add New';
+      case 'edit': return 'Edit';
+      case 'view': return 'Details';
+      default: return 'Management';
     }
   };
 
   const getSubtitle = () => {
     switch (mode) {
-      case 'add': return 'Create a new hotel entry in your system';
-      case 'edit': return 'Update hotel information and details';
-      case 'view': return 'View complete hotel information';
+      case 'add': return 'Create a new entry in your system';
+      case 'edit': return 'Update information and details';
+      case 'view': return 'View complete information';
       default: return '';
     }
   };
@@ -348,10 +454,10 @@ const AddHotel = ({ viewOnly = false }) => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <FormInput
                   name="name"
-                  label="Hotel Name"
+                  label="Name"
                   required
                   icon={Building2}
-                  placeholder="Enter hotel name"
+                  placeholder="Enter name"
                   value={formData.name}
                   onChange={handleInputChange}
                   disabled={viewOnly || loading}
@@ -359,7 +465,7 @@ const AddHotel = ({ viewOnly = false }) => {
                 />
                 <FormInput
                   name="hotel_email"
-                  label="Hotel Email"
+                  label="Email"
                   type="email"
                   icon={Mail}
                   placeholder="hotel@example.com"
@@ -367,6 +473,43 @@ const AddHotel = ({ viewOnly = false }) => {
                   onChange={handleInputChange}
                   disabled={viewOnly || loading}
                   error={errors.hotel_email}
+                />
+                <FormSelect
+                  name="category"
+                  label="Business Category"
+                  icon={Building}
+                  required
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  disabled={viewOnly || loading}
+                  error={errors.category}
+                  options={[
+                    { value: "hotel", label: "Hotel" },
+                    { value: "lodge", label: "Lodge" },
+                    { value: "guest_house", label: "Guest House" },
+                    { value: "resort", label: "Resort" },
+                    { value: "saloon", label: "Saloon" },
+                    { value: "spa", label: "Spa" },
+                    { value: "restaurant", label: "Restaurant" },
+                    { value: "cafe", label: "Café" },
+                    { value: "bar", label: "Bar / Pub" },
+                    { value: "banquet", label: "Banquet Hall" },
+                    { value: "gym", label: "Gym / Fitness Center" },
+                    { value: "clinic", label: "Clinic / Hospital" },
+                    { value: "shop", label: "Shop / Retail Store" },
+                    { value: "manufacturer", label: "Textile Manufacturer" },
+                    { value: "wholesaler", label: "Wholesaler" },
+                    { value: "retail_store", label: "Retail Store" },
+                    { value: "distributor", label: "Distributor" },
+                    { value: "boutique", label: "Boutique" },
+                    { value: "garment_shop", label: "Garment Shop" },
+                    { value: "showroom", label: "Showroom" },
+                    { value: "exporter", label: "Exporter" },
+                    { value: "importer", label: "Importer" },
+                    { value: "fabric_supplier", label: "Fabric Supplier" },
+                    { value: "tailor", label: "Tailor / Stitching Unit" },
+                    { value: "dye_print", label: "Dyeing & Printing Unit" },
+                  ]}
                 />
                 <FormInput
                   name="gst_number"
@@ -378,6 +521,43 @@ const AddHotel = ({ viewOnly = false }) => {
                   onChange={handleInputChange}
                   disabled={viewOnly || loading}
                   error={errors.gst_number}
+                />
+                <FormSelect
+                  name="state"
+                  label="State"
+                  icon={Globe}
+                  required
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  disabled={viewOnly || loading}
+                  error={errors.state}
+                  options={Object.keys(indianCitiesData).map((state) => ({
+                    value: state,
+                    label: state,
+                  }))}
+                />
+                <FormSelect
+                  name="city"
+                  label="City"
+                  icon={Building}
+                  required
+                  placeholder="Select city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  disabled={viewOnly || loading}
+                  error={errors.city}
+                  options={cityOptions}
+                />
+                <FormInput
+                  name="pincode"
+                  label="Pincode"
+                  type="text"
+                  icon={MapPin}
+                  placeholder="Enter pincode"
+                  value={formData.pincode}
+                  onChange={handleInputChange}
+                  disabled={viewOnly || loading}
+                  error={errors.pincode}
                 />
               </div>
               <FormInput
@@ -574,8 +754,8 @@ const AddHotel = ({ viewOnly = false }) => {
                     {submitLoading 
                       ? 'Saving...' 
                       : mode === 'add' 
-                        ? 'Add Hotel' 
-                        : 'Update Hotel'}
+                        ? 'Add' 
+                        : 'Update'}
                   </button>
 )}
 
